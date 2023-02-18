@@ -2,6 +2,6 @@
 
 public interface IUnitOfWork
 {
-    ISongRepository? SongRepository { get; set; }
+    ISongRepository? SongRepository { get; }
     Task<int> SaveChangesAsync();
 }

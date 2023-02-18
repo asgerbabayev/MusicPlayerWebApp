@@ -1,6 +1,10 @@
 ﻿using Bussines.Abstract;
 using Bussines.Concrete;
+using DataAccess.Abstract.UnitOfWork;
+using DataAccess.Concrete.UnitOfWork;
 using Microsoft.Extensions.DependencyInjection;
+using MusicPlayer.Bussines.Abstract;
+using MusicPlayer.Bussines.Concrete;
 using System.Reflection;
 
 namespace Bussines;
@@ -11,6 +15,8 @@ public static class ServiceConfiguration
     {
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddScoped<ISongService, SongManager>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IAuthService, AuthManager>();
         return services;
     }
 }

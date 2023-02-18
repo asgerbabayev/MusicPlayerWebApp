@@ -9,7 +9,7 @@ public interface IRepositoryBase<TEntity, TKey>
     Task Add(TEntity entity);
     Task Update(TEntity entity);
     Task<IEnumerable<TEntity>> GetAll(Expression<Func<TEntity, bool>> expression = null);
-    Task<IEnumerable<TEntity>> GetAllWithInclude(Expression<Func<TEntity, object>>[] includeProperties);
+    Task<IEnumerable<TEntity?>> GetAllWithInclude(params string[] includes);
     Task Remove(TEntity entity);
     Task<TEntity> Find(TKey id);
 }

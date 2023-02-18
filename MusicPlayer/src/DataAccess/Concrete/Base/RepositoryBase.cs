@@ -10,32 +10,33 @@ public class RepositoryBase<TEntity, TKey, TContext> : IRepositoryBase<TEntity, 
     where TEntity : BaseEntity
 {
     private readonly TContext _context;
-
     public RepositoryBase(TContext context) =>
         _context = context;
-
     public async Task Add(TEntity entity)
     => await _context.Set<TEntity>().AddAsync(entity);
-
-
     public async Task<TEntity?> Find(TKey id)
        => await _context.Set<TEntity>().FindAsync(id);
-
     public async Task<IEnumerable<TEntity>> GetAll(Expression<Func<TEntity, bool>> expression = null)
     => expression == null
             ? await _context.Set<TEntity>().ToListAsync()
             : await _context.Set<TEntity>().Where(expression).ToListAsync();
 
-    public async Task<IEnumerable<TEntity>> GetAllWithInclude(Expression<Func<TEntity, object>>[] includeProperties)
-    => await Include(includeProperties).ToListAsync();
 
-    private IQueryable<TEntity> Include(Expression<Func<TEntity, object>>[] includeProperties)
+
+    public async Task<IEnumerable<TEntity?>> GetAllWithInclude(params string[] includes)
     {
-        IQueryable<TEntity> query = _context.Set<TEntity>();
-        return includeProperties.Aggregate(query, (current, includeProperty) =>
-        current.Include(includeProperty));
+        return await Include(includes).AsQueryable().ToListAsync();
     }
 
+
+    private IQueryable<TEntity> Include(params string[] includes)
+    {
+        IQueryable<TEntity> query = _context.Set<TEntity>().AsQueryable();
+        if (includes != null)
+            foreach (string item in includes)
+                query = query.Include(item);
+        return query;
+    }
     public async Task Remove(TEntity entity)
     => _context.Set<TEntity>().Remove(entity);
 

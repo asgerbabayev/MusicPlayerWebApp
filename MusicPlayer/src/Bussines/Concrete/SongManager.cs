@@ -22,4 +22,10 @@ public class SongManager : ISongService
         await _unitOfWork.SongRepository.Add(result);
         await _unitOfWork.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<Song?>> GetAll()
+    {
+        //var result = _mapper.Map<IEnumerable<Song>>(songDto);
+        return await _unitOfWork.SongRepository.GetAllWithInclude(nameof(Song.Artist));
+    }
 }

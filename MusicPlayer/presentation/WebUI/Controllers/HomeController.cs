@@ -1,37 +1,43 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using WebUI.Models;
-using Bussines.Abstract;
+﻿using Bussines.Abstract;
 using Data.DTO_s;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MusicPlayer.Bussines.Abstract;
 
 namespace WebUI.Controllers
 {
     public class HomeController : Controller
     {
+
+        private readonly IAuthService _authService;
         private readonly ILogger<HomeController> _logger;
         private readonly ISongService _service;
 
-        public HomeController(ILogger<HomeController> logger, ISongService service)
+        public HomeController(ILogger<HomeController> logger,
+            ISongService service,
+            IAuthService authService)
         {
             _logger = logger;
             _service = service;
+            _authService = authService;
         }
 
-        public async Task<IActionResult> Index(SongCreateDto song)
+        [Authorize]
+        public async Task<IActionResult> Index()
         {
-            await _service.Add(song);
+            return View(await _service.GetAll());
+        }
+
+        public async Task<IActionResult> Privacy()
+        {
+            await _authService.CreateRole();
             return View();
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> Register([FromQuery] RegisterDto registerDto)
         {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var result = await _authService.Register(registerDto);
+            return Ok(result);
         }
     }
 }
