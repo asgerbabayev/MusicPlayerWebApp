@@ -3,6 +3,7 @@ using Data.Identity;
 using Microsoft.AspNetCore.Identity;
 using MusicPlayer.Bussines.Abstract;
 using MusicPlayer.Bussines.Results;
+using System.Net;
 
 namespace MusicPlayer.Bussines.Concrete;
 
@@ -21,33 +22,31 @@ public class AuthManager : IAuthService
         _roleManager = roleManager;
     }
 
-    public Task<Response> Login(LoginDto loginDto)
+    public async Task<Response> Login(LoginDto loginDto)
     {
-        throw new NotImplementedException();
+        var userExists = await _userManager.FindByNameAsync(loginDto.Username);
+        if (userExists == null) return new Response("Invalid Credentials", HttpStatusCode.Unauthorized, null, null);
+        bool result = await _userManager.CheckPasswordAsync(userExists, loginDto.Password);
+        if (!result) return new Response("Invalid Credentials", HttpStatusCode.Unauthorized, null, null);
+        await _signInManager.SignInAsync(userExists, true);
+        return new Response("error", HttpStatusCode.OK, null, null);
     }
 
     public async Task<Response> Register(RegisterDto registerDto)
     {
         AppUser? existsUser = await _userManager.FindByEmailAsync(registerDto.Email);
-        if (existsUser != null) throw new Exception("Neynirsen bashin xarabdi");
+        if (existsUser != null) throw new Exception();
         AppUser user = new()
         {
             UserName = registerDto.Username,
             Email = registerDto.Email
         };
         var result = await _userManager.CreateAsync(user, registerDto.Password);
-        if (!result.Succeeded) throw new Exception(result.Errors.Select(x => x.Description).ToString());
+        if (!result.Succeeded) return new Response("error", HttpStatusCode.BadRequest, result, null);
 
         var roleResult = await _userManager.AddToRoleAsync(user, "Manager");
-        if (!roleResult.Succeeded) throw new Exception(result.Errors.Select(x => x.Description).ToString());
-        return new Response()
-        {
-            HttpStatusCode = System.Net.HttpStatusCode.OK,
-            Title = "Success",
-            Description = "",
-            Data = ""
-        };
-
+        if (!roleResult.Succeeded) return new Response("error", HttpStatusCode.BadRequest, roleResult, null);
+        return new Response("success", HttpStatusCode.OK, roleResult, null);
     }
 
     public async Task CreateRole()
