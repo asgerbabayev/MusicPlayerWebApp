@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using MusicPlayer.Bussines.Abstract;
 using MusicPlayer.Bussines.Results;
 using System.Net;
+using System.Security.Claims;
 
 namespace MusicPlayer.Bussines.Concrete;
 
@@ -28,6 +29,19 @@ public class AuthManager : IAuthService
         if (userExists == null) return new Response("Invalid Credentials", HttpStatusCode.Unauthorized, null, null);
         bool result = await _userManager.CheckPasswordAsync(userExists, loginDto.Password);
         if (!result) return new Response("Invalid Credentials", HttpStatusCode.Unauthorized, null, null);
+
+        IList<string> roles = await _userManager.GetRolesAsync(userExists);
+
+        IList<Claim> claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.NameIdentifier, userExists.Id.ToString()),
+            new Claim(ClaimTypes.Name,userExists.UserName),
+            new Claim(ClaimTypes.Email,userExists.Email)
+        };
+
+        foreach (string role in roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
+
         await _signInManager.SignInAsync(userExists, true);
         return new Response("error", HttpStatusCode.OK, null, null);
     }

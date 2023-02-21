@@ -40,12 +40,6 @@ namespace WebUI.Controllers
         {
             if (!ModelState.IsValid) return View(loginDto);
             var result = await _authService.Login(loginDto);
-            if (!result.data.Succeeded)
-            {
-                foreach (var error in result.data.Errors)
-                    ModelState.AddModelError("", error.Description);
-                return View(loginDto);
-            }
             return RedirectToAction("Index", "Home");
         }
     }

@@ -1,0 +1,22 @@
+﻿@model SongCreateDto
+@{
+    ViewData["Title"] = "Create";
+}
+
+<form asp-action="Create">
+    
+    <input asp-for="@Model.Name" class="form-control" placeholder="Enter song name" />
+
+
+    <select>
+        @foreach (var item in ViewBag.Artists as IEnumerable<Song>)
+        {
+        <option>@item.Name</option>
+            
+        }
+    </select>
+    <input asp-for="@Model.ArtistId" class="form-control" placeholder="Enter artist" />
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+

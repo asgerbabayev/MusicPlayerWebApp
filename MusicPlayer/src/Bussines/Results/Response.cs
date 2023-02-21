@@ -3,4 +3,4 @@ using System.Net;
 
 namespace MusicPlayer.Bussines.Results;
 
-public record Response(string? title, HttpStatusCode statusCode, IdentityResult? data, object? obj);
+public record Response(string? title, HttpStatusCode statusCode, IdentityResult data, object? obj);
