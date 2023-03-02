@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "src\DataAcces
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebUI", "presentation\WebUI\WebUI.csproj", "{0A9EB185-F0B9-4098-AC5B-3F41E49F4B58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bussines", "src\Bussines\Bussines.csproj", "{F35B3C00-4982-4257-BE0A-E62579D8617A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bussines", "src\Bussines\Bussines.csproj", "{F35B3C00-4982-4257-BE0A-E62579D8617A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

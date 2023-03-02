@@ -1,9 +1,8 @@
 ﻿using Bussines.Abstract;
 using Data.DTO_s;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MusicPlayer.Bussines.Abstract;
-
+using WebUI.ActionFilters;
 namespace WebUI.Controllers
 {
     public class HomeController : Controller
@@ -22,9 +21,11 @@ namespace WebUI.Controllers
             _authService = authService;
         }
 
-        [Authorize]
+        //[Authorize]
+        [MyAuthorize(Roles = "Manager")]
         public async Task<IActionResult> Index()
         {
+
             return View(await _service.GetAll());
         }
 

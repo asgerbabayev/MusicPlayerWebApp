@@ -8,8 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDataAccess(builder.Configuration);
-builder.Services.AddBussines();
-builder.Services.AddBussines();
+builder.Services.AddBussines(builder.Configuration);
 
 builder.Services.ConfigureApplicationCookie(x =>
 {
@@ -26,7 +25,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "default",

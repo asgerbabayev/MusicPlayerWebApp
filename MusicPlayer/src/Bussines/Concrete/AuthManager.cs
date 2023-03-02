@@ -1,26 +1,32 @@
 ﻿using Data.DTO_s;
 using Data.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using MusicPlayer.Bussines.Abstract;
 using MusicPlayer.Bussines.Results;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
+using System.Text;
 
 namespace MusicPlayer.Bussines.Concrete;
 
 public class AuthManager : IAuthService
 {
     private readonly UserManager<AppUser> _userManager;
-    private readonly SignInManager<AppUser> _signInManager;
+    //private readonly SignInManager<AppUser> _signInManager;
     private readonly RoleManager<AppRole> _roleManager;
+    private readonly IConfiguration _configuration;
 
     public AuthManager(UserManager<AppUser> userManager,
-                       SignInManager<AppUser> signInManager,
-                       RoleManager<AppRole> roleManager)
+                       RoleManager<AppRole> roleManager,
+                       IConfiguration configuration)
     {
         _userManager = userManager;
-        _signInManager = signInManager;
+        //_signInManager = signInManager;
         _roleManager = roleManager;
+        _configuration = configuration;
     }
 
     public async Task<Response> Login(LoginDto loginDto)
@@ -32,18 +38,32 @@ public class AuthManager : IAuthService
 
         IList<string> roles = await _userManager.GetRolesAsync(userExists);
 
-        IList<Claim> claims = new List<Claim>()
+        List<Claim> claims = new List<Claim>()
         {
             new Claim(ClaimTypes.NameIdentifier, userExists.Id.ToString()),
             new Claim(ClaimTypes.Name,userExists.UserName),
             new Claim(ClaimTypes.Email,userExists.Email)
         };
 
-        foreach (string role in roles)
-            claims.Add(new Claim(ClaimTypes.Role, role));
+        claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
-        await _signInManager.SignInAsync(userExists, true);
-        return new Response("error", HttpStatusCode.OK, null, null);
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:securityKey"]));
+
+        SigningCredentials signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        DateTime expires = DateTime.Now.AddSeconds(30);
+
+        JwtSecurityToken securityToken = new(
+            issuer: _configuration["Jwt:issuer"],
+            audience: _configuration["Jwt:audience"],
+            claims: claims,
+            expires: expires,
+            signingCredentials: signingCredentials
+            );
+
+        var token = new JwtSecurityTokenHandler().WriteToken(securityToken);
+
+        return new Response("success", HttpStatusCode.OK, null, token);
     }
 
     public async Task<Response> Register(RegisterDto registerDto)
